@@ -92,7 +92,13 @@ class Vehicule:
         # Vrai si la chaîne a exactement la bonne longueur et n'est faite
         # que de caractères alphanumériques. Longueur et nature exactes :
         # déductibles des tests. Une entrée non-str renvoie False.
-        ...
+        if chaine != 17:
+            ValueError ("Le numero de chassis doit commprendre 17 caracteres")
+        if not isinstance (chaine,str) or isinstance (chaine, bool) or not isinstance (chaine,str):
+            TypeError("le numero de chassis doit etre compose de numéros et de lettres.")
+            return False 
+        chaine == True 
+        
 
     # --- Constructeur alternatif ---
 
