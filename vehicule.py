@@ -122,14 +122,31 @@ class Vehicule:
     def to_dict(self):
         # Produire un dict marqué d'un champ « type » (le discriminateur
         # qui guidera la reconstruction). Clés attendues : voir les tests.
-        ...
+        return {
+            "type": "Vehicule",
+            "Marque": self.marque,
+            "Modele": self.modele,
+            "Numero de chassis": self.numero_chassis,
+            "nb_places": self.nb_places,
+            "annee": self._annee,
+            "disponible": self._disponible,
+        }
 
     @classmethod
     def from_dict(cls, donnees):
         # Pendant de to_dict : reconstruire via cls(...), puis restaurer la
         # disponibilité par l'API publique (jamais en écrivant l'attribut
         # privé). Même logique que Livre.from_dict.
-        ...
+        Vehicule = cls(
+            donnees["Marque"],
+            donnees["Modele"],
+            donnees["Numero de chassis"],
+            donnees["nb_places"],
+            donnees["annee"],
+            donnees["disponible"]
+        )
+        Vehicule._restaurer_disponibilite(Vehicule, donnees)
+        return Vehicule
 
     @staticmethod
     def _restaurer_disponibilite(vehicule, donnees):
@@ -164,15 +181,19 @@ class Vehicule:
     def fiche_resume(self):
         # Description de la capacité d'un véhicule générique. Format exact :
         # voir les tests. (Transposé de Livre.taille_estimee.)
-        ...
+        return (f"{self.marque} {self.modele} {hash(self.numero_chassis)}"
+                f"{self.nb_places} {self.annee}"
+                )
 
     # --- Représentations ---
 
     def __str__(self):
-        ...
-
+        return f"{self.marque}, {self.modele}, {hash(self.numero_chassis)}, {self.nb_places}, {self.annee}"
     def __repr__(self):
-        ...
+        return(f"Marque : {self.marque} - Modele : {self.modele}"
+               f" Annee : {self.annee} - Numero de chassis {self.numero_chassis}"
+               f"Nombre de places {self.nb_places} - Disponibilité {self.disponible}"
+        )
 
     # --- Identité (entité) ---
 
@@ -212,17 +233,37 @@ class VoitureElectrique(Vehicule):
     @classmethod
     def depuis_csv(cls, ligne):
         # Comme Vehicule.depuis_csv, mais un champ de plus (l'autonomie).
-        ...
+        champs = ligne.split(";")
+        if len(champs) != 7:
+            raise ValueError(
+                "La ligne doit contenir exactement 7 champs séparés "
+                "par des points-virgules."
+            )
+        marque, modele, numero_chassis, nb_places, annee, disponible, autonomie = champs
+        return cls(marque, modele, numero_chassis, int(nb_places), int(annee), bool(disponible), int(autonomie))
 
     def to_dict(self):
         # ENRICHIR le dictionnaire hérité du parent (ne pas le réécrire) :
         # corriger « type » et ajouter l'attribut propre. (Geste de
         # LivreNumerique.to_dict.)
-        ...
+        donnees = super().to_dict()
+        donnees["type"] = "VoitureElectrique"
+        donnees["Autonomie km"] = self.autonomie_km
+        return donnees
 
     @classmethod
     def from_dict(cls, donnees):
-        ...
+        Vehicule = cls(
+            donnees["Marque"],
+            donnees["Modele"],
+            donnees["Numero de chassis"],
+            donnees["nb_places"],
+            donnees["annee"],
+            donnees["disponible"],
+            donnees["Autonomie km"]
+        )
+        Vehicule._restaurer_disponibilite(Vehicule, donnees)
+        return Vehicule
 
     def fiche_resume(self):
         # On REPREND la fiche de base et on la complète : la capacité reste
@@ -230,10 +271,14 @@ class VoitureElectrique(Vehicule):
         ...
 
     def __str__(self):
-        ...
+        return(f"{self.marque}, {self.modele}, {hash(self.numero_chassis)}, {self.nb_places}, {self.annee}, {self.autonomie_km}")
 
     def __repr__(self):
-        ...
+        return (f"Marque : {self.marque} - Modele : {self.modele}"
+               f" Annee : {self.annee} - Numero de chassis {self.numero_chassis}"
+               f"Nombre de places {self.nb_places} - Disponibilité {self.disponible}"
+               f"Autonomie : {self.autonomie_km}"
+        )
 
 
 class Camion(Vehicule):
