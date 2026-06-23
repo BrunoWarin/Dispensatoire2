@@ -253,7 +253,7 @@ class VoitureElectrique(Vehicule):
 
     @classmethod
     def from_dict(cls, donnees):
-        Vehicule = cls(
+        VoitureElectrique = cls(
             donnees["Marque"],
             donnees["Modele"],
             donnees["Numero de chassis"],
@@ -288,23 +288,49 @@ class Camion(Vehicule):
     def __init__(self, marque, modele, numero_chassis, nb_places, annee,
                  charge_utile_t):
         # Déléguer au parent, puis valider l'attribut propre (charge :
-        # nombre strictement positif, stocké en float).
-        ...
+        # nombre strictement positif, stocké en float
+        super.__init__(marque=marque, modele=modele, numero_chassis=numero_chassis, nb_places=nb_places, annee=annee)
+        if not isinstance(charge_utile_t, float) or isinstance(charge_utile_t,bool):
+            TypeError("La charge utile doit être un chiffre")
+        if charge_utile_t < 0: 
+            ValueError("La charge utile doit etre plsu grande que 0")
+        self.charge_utile_t = charge_utile_t
 
     @property
     def charge_utile_t(self):
-        ...
+        return self.charge_utile_t
 
     @classmethod
     def depuis_csv(cls, ligne):
-        ...
+        champs = ligne.split(";")
+        if len(champs) != 7:
+            raise ValueError(
+                "La ligne doit contenir exactement 6 champs séparés "
+                "par des points-virgules."
+            )
+        marque, modele, numero_chassis, nb_places, annee, disponible, charge_utile_t = champs
+        return cls(
+            marque, modele, numero_chassis,
+            int(nb_places), int(annee), bool(disponible), float(charge_utile_t)
+            )
 
     def to_dict(self):
-        ...
+        donnees = super().to_dict()
+        donnees["type"] = "Camion"
+        donnees["Charge utile"] = self.charge_utile_t
+        return donnees
 
     @classmethod
     def from_dict(cls, donnees):
-        ...
+        Camion = cls(
+            donnees["Marque"],
+            donnees["Modele"],
+            donnees["Numero de chassis"],
+            donnees["nb_places"],
+            donnees["annee"],
+            donnees["disponible"],
+            donnees["Charge utile"]
+        )
 
     def fiche_resume(self):
         # Ici la mesure pertinente n'est PAS le nombre de places : on ne
@@ -313,7 +339,11 @@ class Camion(Vehicule):
         ...
 
     def __str__(self):
-        ...
+        return f"{self.marque}, {self.modele}, {hash(self.numero_chassis)}, {self.nb_places}, {self.annee}, {self.charge_utile_t}"
 
     def __repr__(self):
-        ...
+        return (f"Marque : {self.marque} - Modele : {self.modele}"
+               f" Annee : {self.annee} - Numero de chassis {self.numero_chassis}"
+               f"Nombre de places {self.nb_places} - Disponibilité {self.disponible}"
+               f"Charge utile : {self.charge_utile_t}"
+        )
