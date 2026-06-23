@@ -13,40 +13,77 @@ class Vehicule:
     # (qui ne change jamais, contrairement à la plaque). Seule la
     # disponibilité évolue. Transposé de Livre (identité par ISBN).
 
-    def __init__(self, marque, modele, numero_chassis, nb_places, annee):
-        # Valider chaque caractéristique avant de la stocker :
-        #   - marque, modèle : chaînes non vides ;
-        #   - châssis : utiliser la méthode de validation dédiée ;
-        #   - nb_places, année : entiers, bornes exactes dans les tests.
-        # Distinguer TypeError (mauvais type) et ValueError (mauvaise valeur).
-        # À la création, le véhicule est disponible.
-        ...
-
-    # --- Propriétés en lecture seule ---
+    def __init__(self, marque, modele, numero_chassis, nb_places, annee, disponible):
+        if not isinstance (marque, str):
+            TypeError("Le nom de la marque doit être une chaine de caractere ")
+        if not isinstance(modele, str):
+            TypeError("Le modele doit être une chaine de caractere")
+        if not isinstance (numero_chassis, int) or isinstance (numero_chassis,bool):
+            TypeError ("Le numéro de chassis doit être un numero")
+        if not isinstance (nb_places, int) or isinstance (nb_places,bool):
+            TypeError ("Le numéro de places doit être un numero")
+        if not isinstance (annee, int) or isinstance (annee,bool):
+            TypeError ("L'année doit être un numero")
+        self._marque = marque
+        self._modele = modele 
+        self._numero_chassis = numero_chassis
+        self._nb_places = nb_places
+        self._annee = annee 
+        disponible == True
 
     @property
     def marque(self):
-        ...
+        """Retourne la marque de la voiture.
+
+        Returns:
+            str: Marque de la voiture.
+        """
+        return self._marque
 
     @property
     def modele(self):
-        ...
+        """Retourne le modele de la voiture 
+
+        Returns:
+            str: Modele de la voiture.
+        """
+        return self._modele
 
     @property
     def numero_chassis(self):
-        ...
+        """Retourne le numero de chassis
+
+        Returns:
+            str: numero de chassis
+        """
+        return self._numero_chassis
 
     @property
     def nb_places(self):
-        ...
+        """Retourne le nombre de places
+
+        Returns:
+            int: Nombre de places.
+        """
+        return self._nb_places
 
     @property
     def annee(self):
-        ...
+        """Retourne l'annee de la voiture
+
+        Returns:
+            int: Annee de la voiture 
+        """
+        return self._annee
 
     @property
     def disponible(self):
-        ...
+        """Retourne la disponibilite de la voiture 
+
+        Returns:
+            bool: Disponibilité de la voiture.
+        """
+        return self.disponible
 
     # --- Méthode statique ---
 
