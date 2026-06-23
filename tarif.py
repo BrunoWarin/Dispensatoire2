@@ -15,6 +15,17 @@ class Tarif:
     # avec Vehicule, qui est une entité (identité par châssis).
 
     def __init__(self, montant, devise="EUR"):
+        """Initialise un tarif 
+
+        Args:
+            montant (int): Montant
+            devise (str, optional): Devise du montant. Defaults to "EUR".
+
+        Raises:
+            TypeError: La devise doit etre une chaine de caractere
+            TypeError: Le montant doit être un chiffre
+            ValueError: Le montant doit être plus grand que 0
+        """
         # Refuser un montant strictement négatif ; stocker le montant en float.
         if not isinstance (devise, str):
             raise TypeError("La devise doit etre une chaine de caractere")
@@ -27,35 +38,63 @@ class Tarif:
 
     @property
     def montant(self):
+        """Retourne le montant
+
+        Returns:
+            int: Le montant
+        """
         return self._montant
 
     @property
     def devise(self):
+        """Retourne la devise 
+
+        Returns:
+            str: Devise du montant
+        """
         return self._devise 
 
     def __eq__(self, autre):
-        # Égalité de valeur : même montant ET même devise.
-        # Renvoyer NotImplemented si « autre » n'est pas un Tarif.
-        ...
+        """Verifie l'eglite entre deux montants et deux devises
+
+        Args:
+            autre (): 
+
+        Raises:
+            ValueError: Si les deux devises sont différentes.
+
+        Returns:
+            bool: True si les deux montants correspondent, sinon False.
+        """
+        if not isinstance(autre,Tarif):
+            return NotImplemented
+        if not self.devise == autre.devise:
+            raise ValueError("On ne peut pas comparer des devises différentes")
+        return self.montant == autre.montant
 
     def __hash__(self):
-        # Cohérent avec __eq__ : hacher le couple (montant, devise).
-        ...
+        """Rend l'objet hachable de façon cohérent avec __eq__
+        """
+        return hash(self.montant, self.devise)
 
     def __lt__(self, autre):
-        # Comparer deux Tarif de MÊME devise ; devises différentes -> erreur.
-        # Comme Argent : __lt__ + @total_ordering suffisent à dériver tout
-        # le reste de l'ordre (<=, >, >=).
-        ...
+        if not isinstance(autre,Tarif):
+            return NotImplemented
+        if not self.devise == autre.devise:
+            raise ValueError("On ne peut pas comparer des devises différentes")
+        return self.montant < autre.montant
+
 
     def __add__(self, autre):
-        # Additionner deux Tarif de MÊME devise -> un NOUVEAU Tarif.
-        # NotImplemented si « autre » n'est pas un Tarif (l'addition avec un
-        # nombre doit échouer, pas réussir silencieusement).
+        if not isinstance(autre,Tarif):
+            return NotImplemented
+        if not self.devise == autre.devise:
+            raise ValueError("On ne peut pas comparer des devises différentes")
+        return Tarif(self.montant + autre.montant, self.devise)
         ...
 
     def __str__(self):
-        ...
+        return f"{self.montant} {self.devise}"
 
     def __repr__(self):
-        ...
+        return f"Argent({self.montant},{self.devise})"
