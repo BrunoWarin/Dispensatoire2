@@ -94,7 +94,17 @@ class Tarif:
         ...
 
     def __str__(self):
+        """Affiche une représentation lisible des tarifs
+
+        Returns:
+            str: representation lisible des tarifs 
+        """
         return f"{self.montant} {self.devise}"
 
     def __repr__(self):
+        """Affiche une representation non ambigue des tarifs 
+
+        Returns:
+            str: representations non ambigue des tarifs
+        """
         return f"Argent({self.montant},{self.devise})"
