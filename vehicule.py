@@ -13,7 +13,7 @@ class Vehicule:
     # (qui ne change jamais, contrairement à la plaque). Seule la
     # disponibilité évolue. Transposé de Livre (identité par ISBN).
 
-    def __init__(self, marque, modele, numero_chassis, nb_places, annee, disponible):
+    def __init__(self, marque, modele, numero_chassis, nb_places, annee):
         if not isinstance (marque, str):
             TypeError("Le nom de la marque doit être une chaine de caractere ")
         if not isinstance(modele, str):
@@ -29,7 +29,7 @@ class Vehicule:
         self._numero_chassis = numero_chassis
         self._nb_places = nb_places
         self._annee = annee 
-        disponible == True
+        self._disponible = True
 
     @property
     def marque(self):
@@ -83,7 +83,7 @@ class Vehicule:
         Returns:
             bool: Disponibilité de la voiture.
         """
-        return self.disponible
+        return self._disponible
 
     # --- Méthode statique ---
 
@@ -108,7 +108,14 @@ class Vehicule:
         # cls(...). Même rôle que Livre.depuis_chaine_csv : utiliser cls
         # (et non Vehicule) est ce qui donnera le TYPE EXACT dans les
         # sous-classes.
-        ...
+        champs = ligne.split(";")
+        if len(champs) != 6:
+            raise ValueError(
+                "La ligne doit contenir exactement 6 champs séparés "
+                "par des points-virgules."
+            )
+        marque, modele, numero_chassis, nb_places, annee, disponible = champs
+        return cls(marque, modele, numero_chassis, int(nb_places), int(annee), bool(disponible))
 
     # --- Sérialisation JSON ---
 
@@ -126,19 +133,33 @@ class Vehicule:
 
     @staticmethod
     def _restaurer_disponibilite(vehicule, donnees):
+        """Restaure la disponibilite d'un vehicule 
+
+        Args:
+            vehicule (str): Le vehicule 
+            donnees (_type_): _description_
+            disponible (_type_): _description_
+        """
         # Si l'objet était loué, le replacer dans cet état via la méthode
         # métier. Factorisé : toutes les sous-classes restaurent pareil.
-        ...
+        if not donnees.get("disponible", True):
+            vehicule.emprunter()
+
 
     # --- Méthodes métier ---
 
     def louer(self):
         # Bascule vers « loué » ; refuser si déjà loué.
-        ...
+        if not self._disponible:
+            raise ValueError("Vehicule deja loue")
+        self._disponible = False
 
     def restituer(self):
         # Bascule vers « disponible » ; refuser si déjà disponible.
-        ...
+        if self._disponible:
+            raise ValueError("Vehicule déjà disponible")
+        self._disponible = True
+
 
     def fiche_resume(self):
         # Description de la capacité d'un véhicule générique. Format exact :
@@ -158,11 +179,13 @@ class Vehicule:
     def __eq__(self, autre):
         # Vehicule est une ENTITE : égalité par numéro de châssis (comme
         # Livre par ISBN). NotImplemented si « autre » n'est pas un Vehicule.
-        ...
+        if not isinstance(autre, self.numero_chassis):
+            return NotImplemented
+        return self.numero_chassis == autre.numero_chassis
 
     def __hash__(self):
         # Cohérent avec __eq__ : fondé sur le châssis.
-        ...
+        return hash(self.numero_chassis)
 
 
 class VoitureElectrique(Vehicule):
@@ -170,13 +193,21 @@ class VoitureElectrique(Vehicule):
 
     def __init__(self, marque, modele, numero_chassis, nb_places, annee,
                  autonomie_km):
-        # Déléguer la validation héritée au parent, puis valider l'attribut
-        # propre (autonomie : entier strictement positif).
-        ...
+        super.__init__(marque=marque, modele=modele, numero_chassis=numero_chassis, nb_places= nb_places, annee= annee)
+        if not isinstance(autonomie_km, int) or isinstance (autonomie_km, bool):
+            TypeError("L'autonome doit être un chiffre entirer")
+        if autonomie_km < 0: 
+            ValueError("L'autonomie doit etre un entier positif")
+        self._autonomie_km = autonomie_km 
 
     @property
     def autonomie_km(self):
-        ...
+        """Retourne l'autonomie de la voiture.
+
+        Returns:
+            int: Autonomie de la voiture.
+        """
+        return self._autonomie_km
 
     @classmethod
     def depuis_csv(cls, ligne):
