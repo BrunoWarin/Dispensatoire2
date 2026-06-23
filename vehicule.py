@@ -9,11 +9,24 @@
 
 
 class Vehicule:
-    # ENTITE largement immuable. Identité métier : le numéro de châssis
-    # (qui ne change jamais, contrairement à la plaque). Seule la
-    # disponibilité évolue. Transposé de Livre (identité par ISBN).
 
     def __init__(self, marque, modele, numero_chassis, nb_places, annee):
+        """Initialise un véhicule en validant ses caracteristiques.
+
+        Args:
+            marque (str): Marque du vehicule 
+            modele (str): Modele du vehicule
+            numero_chassis (int): Numero de chassis du vehicule
+            nb_places (int): Nombre de places du vehicule
+            annee (int): Annee de fabrication du vehicule
+
+        Raises:
+            TypeError: Si la marque n'est pas une chaine de caractere
+            TypeError: Si le modele n'est pas une chaine de caractere 
+            TypeError: Si le numero de chassis n'est pas un nombre entier 
+            TypeError: Si le numero de place n'est pas un numero
+            TypeError: Si l'annee n'est pas un numero 
+        """
         if not isinstance (marque, str):
             raise TypeError("Le nom de la marque doit être une chaine de caractere ")
         if not isinstance(modele, str):
@@ -85,13 +98,21 @@ class Vehicule:
         """
         return self._disponible
 
-    # --- Méthode statique ---
 
     @staticmethod
     def chassis_valide(chaine):
-        # Vrai si la chaîne a exactement la bonne longueur et n'est faite
-        # que de caractères alphanumériques. Longueur et nature exactes :
-        # déductibles des tests. Une entrée non-str renvoie False.
+        """Verifie que le numero de chassis est valide
+
+        Args:
+            chaine (str(ou int)): Numero de chassis de la voiture 
+
+        Raises:
+            ValueError: Le numero de chassis ne comprend pas 17 caractere
+            TypeError: Le numero de chassis n'est pas compose de chiffres ou de lettres
+
+        Returns:
+            bool: True si le numero de chassis est valide, False si ce n'est pas le cas
+        """
         if chaine != 17:
             raise ValueError ("Le numero de chassis doit commprendre 17 caracteres")
         if not isinstance (chaine,str) or isinstance (chaine, bool) or not isinstance (chaine,str):
@@ -100,14 +121,21 @@ class Vehicule:
         chaine == True 
         
 
-    # --- Constructeur alternatif ---
 
     @classmethod
     def depuis_csv(cls, ligne):
-        # Découper la ligne, vérifier le nombre de champs, construire via
-        # cls(...). Même rôle que Livre.depuis_chaine_csv : utiliser cls
-        # (et non Vehicule) est ce qui donnera le TYPE EXACT dans les
-        # sous-classes.
+        """Cree une voiture a partir d'une ligne csv.
+
+        Args:
+            ligne (str): Ligne au format 
+            marque, modele, numero_chassis, nb_places, annee, disponible 
+
+        Raises:
+            ValueError: Si le champ ne compte pas 6 elements
+
+        Returns:
+            _type_: Une voiture avec des nouvelles valeurs.
+        """
         champs = ligne.split(";")
         if len(champs) != 6:
             raise ValueError(
@@ -117,11 +145,13 @@ class Vehicule:
         marque, modele, numero_chassis, nb_places, annee, disponible = champs
         return cls(marque, modele, numero_chassis, int(nb_places), int(annee), bool(disponible))
 
-    # --- Sérialisation JSON ---
 
     def to_dict(self):
-        # Produire un dict marqué d'un champ « type » (le discriminateur
-        # qui guidera la reconstruction). Clés attendues : voir les tests.
+        """Serialise un vehicule en dictionnaire compartible avec JSON
+
+        Returns:
+            dict: Dictionnaire avec les donnees du vehicule.
+        """
         return {
             "type": "Vehicule",
             "Marque": self.marque,
@@ -134,9 +164,14 @@ class Vehicule:
 
     @classmethod
     def from_dict(cls, donnees):
-        # Pendant de to_dict : reconstruire via cls(...), puis restaurer la
-        # disponibilité par l'API publique (jamais en écrivant l'attribut
-        # privé). Même logique que Livre.from_dict.
+        """Reconstruit un vehicule a partir d'un dictionnaire.
+
+        Args:
+            donnees (dict): Dictionnaire produit par to_dict
+
+        Returns:
+            Vehicule: Equivalent au vehicule qui a ete serialise
+        """
         Vehicule = cls(
             donnees["Marque"],
             donnees["Modele"],
@@ -157,66 +192,104 @@ class Vehicule:
             donnees (_type_): _description_
             disponible (_type_): _description_
         """
-        # Si l'objet était loué, le replacer dans cet état via la méthode
-        # métier. Factorisé : toutes les sous-classes restaurent pareil.
         if not donnees.get("disponible", True):
             vehicule.emprunter()
 
 
-    # --- Méthodes métier ---
-
     def louer(self):
-        # Bascule vers « loué » ; refuser si déjà loué.
+        """Loue un vehicule disponible
+
+        Raises:
+            ValueError: Si le vehicule est deja loue
+        """
         if not self._disponible:
             raise ValueError("Vehicule deja loue")
         self._disponible = False
 
     def restituer(self):
-        # Bascule vers « disponible » ; refuser si déjà disponible.
+        """Restitue un vehicule loué
+
+        Raises:
+            ValueError: Si le Vehicule est deja disponible
+        """
         if self._disponible:
             raise ValueError("Vehicule déjà disponible")
         self._disponible = True
 
 
     def fiche_resume(self):
-        # Description de la capacité d'un véhicule générique. Format exact :
-        # voir les tests. (Transposé de Livre.taille_estimee.)
+        """Affiche un resume de l'etat du vehicule.
+
+        Returns:
+            str: Resume de l'ett du vehicule 
+        """
         return (f"{self.marque} {self.modele} {hash(self.numero_chassis)}"
                 f"{self.nb_places} {self.annee}"
                 )
 
-    # --- Représentations ---
 
     def __str__(self):
+        """Affichage compréhensible pour l'utilisateur du vehicule 
+
+        Returns:
+            str: affichage comprehensible du vehicule 
+        """
         return f"{self.marque}, {self.modele}, {hash(self.numero_chassis)}, {self.nb_places}, {self.annee}"
     def __repr__(self):
+        """Affichage non ambigue du vehicule 
+
+        Returns:
+            str: affichage non ambigue du vehicule.
+        """
         return(f"Marque : {self.marque} - Modele : {self.modele}"
                f" Annee : {self.annee} - Numero de chassis {self.numero_chassis}"
                f"Nombre de places {self.nb_places} - Disponibilité {self.disponible}"
         )
 
-    # --- Identité (entité) ---
 
     def __eq__(self, autre):
-        # Vehicule est une ENTITE : égalité par numéro de châssis (comme
-        # Livre par ISBN). NotImplemented si « autre » n'est pas un Vehicule.
+        """Egalite par numero de chassis
+
+        Args:
+            autre (int): numero de chassis
+
+        Returns:
+            bool: True si les numeros de chassis correspondent, sinon False.
+        """
         if not isinstance(autre, self.numero_chassis):
             return NotImplemented
         return self.numero_chassis == autre.numero_chassis
 
     def __hash__(self):
-        # Cohérent avec __eq__ : fondé sur le châssis.
+        """Hash le numero de chassis.
+
+        Returns:
+            hash: representation hash du numero de chassis.
+        """
         return hash(self.numero_chassis)
 
 
 class VoitureElectrique(Vehicule):
-    # Enrichit Vehicule d'une autonomie. Transposé de LivreNumerique.
 
     def __init__(self, marque, modele, numero_chassis, nb_places, annee,
                  autonomie_km):
+        """Initialise une voiture electrique 
+
+        Args:
+            marque (str): Marque de la voiture
+            modele (str): Modele de la voiture 
+            numero_chassis (int): Numero de chassis de la voiture 
+            nb_places (int): Nombre de places de la voiture
+            annee (int): Annee de fabrication de la voiture 
+            autonomie_km (int): Autonomie electrique en km de la voiture 
+
+        Raises:
+            TypeError: Si l'autonomie n'est pas un chiffre entier
+            ValueError: Si l'autonomie n'est pas un entier positif
+        """
         super.__init__(marque=marque, modele=modele, numero_chassis=numero_chassis, nb_places= nb_places, annee= annee)
         if not isinstance(autonomie_km, int) or isinstance (autonomie_km, bool):
-            TypeError("L'autonome doit être un chiffre entirer")
+            TypeError("L'autonomie doit être un chiffre entier")
         if autonomie_km < 0: 
             ValueError("L'autonomie doit etre un entier positif")
         self._autonomie_km = autonomie_km 
@@ -232,7 +305,18 @@ class VoitureElectrique(Vehicule):
 
     @classmethod
     def depuis_csv(cls, ligne):
-        # Comme Vehicule.depuis_csv, mais un champ de plus (l'autonomie).
+        """Cree une voiture electrique a partir d'une ligne CSV a 7 champs.
+
+        Args:
+            ligne (str): ligne au format:
+            marque, modele, numero_chassis, nb_places, annee, disponible, autonomie
+
+        Raises:
+            ValueError: Si la ligne ne contient pas 7 elementS
+
+        Returns:
+            VoitureElectrique: Initialisation d'une nouvelle voiture electrique.
+        """
         champs = ligne.split(";")
         if len(champs) != 7:
             raise ValueError(
@@ -243,9 +327,11 @@ class VoitureElectrique(Vehicule):
         return cls(marque, modele, numero_chassis, int(nb_places), int(annee), bool(disponible), int(autonomie))
 
     def to_dict(self):
-        # ENRICHIR le dictionnaire hérité du parent (ne pas le réécrire) :
-        # corriger « type » et ajouter l'attribut propre. (Geste de
-        # LivreNumerique.to_dict.)
+        """Enrichit le dictionnaire parent avec l'autonomie en km 
+
+        Returns:
+            dict: Dictionnaire de la voiture electrique
+        """
         donnees = super().to_dict()
         donnees["type"] = "VoitureElectrique"
         donnees["Autonomie km"] = self.autonomie_km
@@ -253,6 +339,14 @@ class VoitureElectrique(Vehicule):
 
     @classmethod
     def from_dict(cls, donnees):
+        """Reconstruit une voiture electrique a partir d'un dictionnaire 
+
+        Args:
+            donnees (dict): Dictionnaire produit par to_dict
+
+        Returns:
+            VoitureElectrique: Une voiture electrique.
+        """
         VoitureElectrique = cls(
             donnees["Marque"],
             donnees["Modele"],
@@ -266,14 +360,16 @@ class VoitureElectrique(Vehicule):
         return Vehicule
 
     def fiche_resume(self):
-        # On REPREND la fiche de base et on la complète : la capacité reste
-        # un préfixe (ENRICHISSEMENT). Format exact : voir les tests.
         ...
 
     def __str__(self):
+        """Retourne une représentation comprehensible pour l'utilisateur 
+        """
         return(f"{self.marque}, {self.modele}, {hash(self.numero_chassis)}, {self.nb_places}, {self.annee}, {self.autonomie_km}")
 
     def __repr__(self):
+        """Retourne un affichage non ambigue de la voiture electrique
+        """
         return (f"Marque : {self.marque} - Modele : {self.modele}"
                f" Annee : {self.annee} - Numero de chassis {self.numero_chassis}"
                f"Nombre de places {self.nb_places} - Disponibilité {self.disponible}"
@@ -282,13 +378,24 @@ class VoitureElectrique(Vehicule):
 
 
 class Camion(Vehicule):
-    # La mesure pertinente est la charge utile, pas le nombre de places.
-    # Transposé de LivreAudio (durée d'écoute plutôt que pages).
+
 
     def __init__(self, marque, modele, numero_chassis, nb_places, annee,
                  charge_utile_t):
-        # Déléguer au parent, puis valider l'attribut propre (charge :
-        # nombre strictement positif, stocké en float
+        """Initialise un camion
+
+        Args:
+            marque (str): Marque de la voiture
+            modele (str): Modele de la voiture 
+            numero_chassis (int): Numero de chassis de la voiture 
+            nb_places (int): Nombre de places de la voiture
+            annee (int): Annee de fabrication de la voiture 
+            Charge utile (float): Charge utile du camion 
+
+        Raises:
+            TypeError: Si la charge utile n'est pas un chiffre
+            ValueError: Si la charge utile est inférieure à 0 
+        """
         super.__init__(marque=marque, modele=modele, numero_chassis=numero_chassis, nb_places=nb_places, annee=annee)
         if not isinstance(charge_utile_t, float) or isinstance(charge_utile_t,bool):
             raise TypeError("La charge utile doit être un chiffre")
@@ -298,10 +405,27 @@ class Camion(Vehicule):
 
     @property
     def charge_utile_t(self):
+        """Retourne la charge utile 
+
+        Returns:
+            float: Charge utile du camion.
+        """
         return self.charge_utile_t
 
     @classmethod
     def depuis_csv(cls, ligne):
+        """Crée un Camion à partir d'une ligne CSV à 7 champs.
+
+        Args:
+            ligne (str): Ligne au format
+            marque, modele, numero_chassis, nb_places, annee, disponible, charge_utile_t
+
+        Raises:
+            ValueError: Si la ligne ne contient pas 7 elements 
+
+        Returns:
+            Camion: Initialisation d'un camion
+        """
         champs = ligne.split(";")
         if len(champs) != 7:
             raise ValueError(
@@ -315,6 +439,11 @@ class Camion(Vehicule):
             )
 
     def to_dict(self):
+        """Enrichit le dictionnaire parent en ajoutant la charge utile 
+
+        Returns:
+            dict: Dictionnaire du camion
+        """
         donnees = super().to_dict()
         donnees["type"] = "Camion"
         donnees["Charge utile"] = self.charge_utile_t
@@ -322,6 +451,14 @@ class Camion(Vehicule):
 
     @classmethod
     def from_dict(cls, donnees):
+        """Reconstruit un camion a partir du dictionnaire.
+
+        Args:
+            donnees (dict): Dictionnaire construit par to_dict
+
+        Returns:
+            Camion: Un camion 
+        """
         Camion = cls(
             donnees["Marque"],
             donnees["Modele"],
@@ -333,15 +470,16 @@ class Camion(Vehicule):
         )
 
     def fiche_resume(self):
-        # Ici la mesure pertinente n'est PAS le nombre de places : on ne
-        # réutilise donc PAS la fiche de base (REMPLACEMENT). Format exact :
-        # voir les tests.
         ...
 
     def __str__(self):
+        """Representation d'un camion comprenhensible par l'utilisateur.
+        """
         return f"{self.marque}, {self.modele}, {hash(self.numero_chassis)}, {self.nb_places}, {self.annee}, {self.charge_utile_t}"
 
     def __repr__(self):
+        """Representation non ambigue d'un camion
+        """
         return (f"Marque : {self.marque} - Modele : {self.modele}"
                f" Annee : {self.annee} - Numero de chassis {self.numero_chassis}"
                f"Nombre de places {self.nb_places} - Disponibilité {self.disponible}"

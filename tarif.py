@@ -22,16 +22,16 @@ class Tarif:
             raise TypeError("Le montant doit être un chiffre")
         if montant < 0: 
             raise ValueError("Le montant doit être plus grand que 0")
-        self.montant = montant
-        self.devise = devise 
+        self._montant = montant
+        self._devise = devise 
 
     @property
     def montant(self):
-        ...
+        return self._montant
 
     @property
     def devise(self):
-        ...
+        return self._devise 
 
     def __eq__(self, autre):
         # Égalité de valeur : même montant ET même devise.
