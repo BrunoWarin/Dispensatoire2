@@ -15,15 +15,15 @@ class Vehicule:
 
     def __init__(self, marque, modele, numero_chassis, nb_places, annee):
         if not isinstance (marque, str):
-            TypeError("Le nom de la marque doit être une chaine de caractere ")
+            raise TypeError("Le nom de la marque doit être une chaine de caractere ")
         if not isinstance(modele, str):
-            TypeError("Le modele doit être une chaine de caractere")
+            raise TypeError("Le modele doit être une chaine de caractere")
         if not isinstance (numero_chassis, int) or isinstance (numero_chassis,bool):
-            TypeError ("Le numéro de chassis doit être un numero")
+            raise TypeError ("Le numéro de chassis doit être un numero")
         if not isinstance (nb_places, int) or isinstance (nb_places,bool):
-            TypeError ("Le numéro de places doit être un numero")
+            raise TypeError ("Le numéro de places doit être un numero")
         if not isinstance (annee, int) or isinstance (annee,bool):
-            TypeError ("L'année doit être un numero")
+            raise TypeError ("L'année doit être un numero")
         self._marque = marque
         self._modele = modele 
         self._numero_chassis = numero_chassis
@@ -93,9 +93,9 @@ class Vehicule:
         # que de caractères alphanumériques. Longueur et nature exactes :
         # déductibles des tests. Une entrée non-str renvoie False.
         if chaine != 17:
-            ValueError ("Le numero de chassis doit commprendre 17 caracteres")
+            raise ValueError ("Le numero de chassis doit commprendre 17 caracteres")
         if not isinstance (chaine,str) or isinstance (chaine, bool) or not isinstance (chaine,str):
-            TypeError("le numero de chassis doit etre compose de numéros et de lettres.")
+            raise TypeError("le numero de chassis doit etre compose de numéros et de lettres.")
             return False 
         chaine == True 
         
@@ -291,9 +291,9 @@ class Camion(Vehicule):
         # nombre strictement positif, stocké en float
         super.__init__(marque=marque, modele=modele, numero_chassis=numero_chassis, nb_places=nb_places, annee=annee)
         if not isinstance(charge_utile_t, float) or isinstance(charge_utile_t,bool):
-            TypeError("La charge utile doit être un chiffre")
+            raise TypeError("La charge utile doit être un chiffre")
         if charge_utile_t < 0: 
-            ValueError("La charge utile doit etre plsu grande que 0")
+            raise ValueError("La charge utile doit etre plsu grande que 0")
         self.charge_utile_t = charge_utile_t
 
     @property

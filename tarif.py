@@ -16,7 +16,14 @@ class Tarif:
 
     def __init__(self, montant, devise="EUR"):
         # Refuser un montant strictement négatif ; stocker le montant en float.
-        ...
+        if not isinstance (devise, str):
+            raise TypeError("La devise doit etre une chaine de caractere")
+        if not isinstance (montant, int) or isinstance (montant, bool):
+            raise TypeError("Le montant doit être un chiffre")
+        if montant < 0: 
+            raise ValueError("Le montant doit être plus grand que 0")
+        self.montant = montant
+        self.devise = devise 
 
     @property
     def montant(self):
